@@ -3,5 +3,5 @@
  {:test
   {:extra-paths ["test"]
    :extra-deps {io.github.wandersoncferreira/appa {:local/root "../../../appa"}}
-   :exec-fn appa.api/-main
+   :exec-fn appa.api/run-test
    :main-opts ["-m" "appa.runner"]}}}

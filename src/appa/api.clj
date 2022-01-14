@@ -46,6 +46,17 @@
 
 (defn test
   [arg-map]
-  (println (test-all-test-namespaces arg-map))
-  (shutdown-agents)
-  (System/exit 0))
+  (let [arg-map (if (empty? (:parallelism arg-map))
+                  (assoc arg-map :parallelism true)
+                  arg-map)
+        result (test-all-test-namespaces arg-map)]
+    (println result)
+    result))
+
+(defn run-test
+  [arg-map]
+  (try
+    (test arg-map)
+    (System/exit 0)
+    (finally
+      (shutdown-agents))))
