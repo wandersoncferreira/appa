@@ -6,10 +6,15 @@
 (defn- accumulate [m k v]
   (update-in m [k] (fnil conj #{}) v))
 
+(defn- bool [v]
+  (Boolean/valueOf v))
+
 (def cli-options
   [["-d" "--dir DIRNAME" "Name of the directory containing tests. Defaults to \"test\"."
     :parse-fn str
-    :assoc-fn accumulate]])
+    :assoc-fn accumulate]
+   ["-p" "--parallelism BOOLEAN" "Turn parallelism on and off. Defaults to `true`."
+    :parse-fn bool]])
 
 (defn -main
   [& args]

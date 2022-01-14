@@ -4,7 +4,8 @@
    [appa.worker :as worker]
    [clojure.java.io :as io]
    [clojure.set :as set]
-   [clojure.tools.namespace.find :as find]))
+   [clojure.tools.namespace.find :as find]
+   [clojure.test :as t]))
 
 (defn ^:private vars-with-same-key-name
   [vars key-name]
@@ -37,9 +38,11 @@
                      (some #(re-matches % (name n)) [#".*\-test$"]))))]
     (println (format "\nRunning tests in %s" dirs))
     (dorun (map require nses))
-    (let [vars (->> (map group-vars nses)
-                    (apply (partial merge-with set/union)))]
-      (worker/manager (merge vars options)))))
+    (if-not (:parallelism options)
+      (apply t/run-tests nses)
+      (let [vars (->> (map group-vars nses)
+                      (apply (partial merge-with set/union)))]
+        (worker/manager (merge vars options))))))
 
 (defn test
   [arg-map]
