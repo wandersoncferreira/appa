@@ -5,7 +5,9 @@
   (:import
    (java.util.concurrent Executors FutureTask)))
 
-(def parallel-thread-pool-size 10)
+(def parallel-thread-pool-size
+  "Default value for how many threads is available to run tests in parallel."
+  10)
 
 (defn merge-results
   [report-futures]
@@ -13,10 +15,12 @@
     (apply (partial merge-with +) reports)))
 
 (defn manager
-  [{:test-vars/keys [parallel dedicated others]}]
+  [{:vars/keys [parallel dedicated unspecified]
+    :keys [parallel-pool-size]
+    :or {parallel-pool-size parallel-thread-pool-size}}]
   (let [result (atom nil)
         executors (atom nil)
-        exec-parallel-tests (Executors/newFixedThreadPool parallel-thread-pool-size)]
+        exec-parallel-tests (Executors/newFixedThreadPool parallel-pool-size)]
 
 
     (swap! executors conj exec-parallel-tests)
@@ -48,7 +52,7 @@
                                         (t/test-vars [v])
                                         @report/*report-counters*))))))
 
-      (println (format "\nRunning tests... Found %s vars" (count others)))
+      (println (format "\nRunning tests... Found %s vars" (count unspecified)))
       (let [exec (Executors/newSingleThreadExecutor)]
         (swap! executors conj exec)
         (swap! result conj
@@ -56,8 +60,8 @@
                         ^Callable (fn []
                                     (binding [t/report report/report
                                               report/*report-counters* (ref report/*initial-report-counters*)]
-                                      (dotimes [_ (count others)] (report/inc-report-counter :test))
-                                      (t/test-vars (vec others))
+                                      (dotimes [_ (count unspecified)] (report/inc-report-counter :test))
+                                      (t/test-vars (vec unspecified))
                                       @report/*report-counters*)))))
 
       ;; wait for all the report results
