@@ -1,3 +1,9 @@
 # Appa Demo
 
-Execute the tests running `clj -X:test` in the command line.
+Execute the tests using `appa`:
+
+``` shell
+cd ~/demo/appa-demo
+clj -X:test
+```
+
