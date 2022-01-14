@@ -1,0 +1,7 @@
+{:paths ["src"]
+ :aliases
+ {:test
+  {:extra-paths ["test"]
+   :extra-deps {io.github.wandersoncferreira/appa {:local/root "../../../appa"}}
+   :exec-args {:parallel true}
+   :exec-fn appa.api/test}}}
