@@ -1,9 +1,8 @@
 # appa
 Appa is a test runner for `clojure.test` which allow you to annotate tests with
-`^:parallel` metadata to run the specified test in a
-ThreadPool in parallel or in a dedicated ThreadPool by itself.
+`^:parallel` metadata to run the specified test in a ThreadPool in parallel.
 
-Tests not specified are run sequentially in a single dedicated ThreadPool.
+Tests not specified are run sequentially first.
 
 See `demo/appa-demo` for the complete usage example.
 
@@ -23,7 +22,7 @@ Your test cases will become
 (deftest test-3
   (is (nil? (sut/print-and-sleep 3))))
 
-(deftest ^:dedicated test-4
+(deftest test-4
   (is (nil? (sut/print-and-sleep 4))))
 ```
 
@@ -39,27 +38,27 @@ and the output
 
 Running tests in #{"test"}
 
-Running tests in parallel. Found 2 vars
+Running sequential tests... Found 4 vars
+= start = Business logic number  3
+= end = Business logic updated!
+= start = Business logic number  4
+= end = Business logic updated!
+Inside another thread!
 
-Running tests in dedicated thread pool. Found 1 vars
-
-Running tests... Found 1 vars
-= start = Business logic number  = start = Business logic number  = start = Business logic number = start = Business logic number   3
-1
-4
-2
+Running tests in parallel. Found 3 vars
+= start = Business logic number  2
+= start = Business logic number  1
 = end = Business logic updated!
 = end = Business logic updated!
+Inside another thread!
 
 FAIL in () (core_test.clj:9)
 expected: (true? (sut/print-and-sleep 2))
   actual: (not (true? nil))
-= end = Business logic updated!
-= end = Business logic updated!
 
-Ran 4 tests containing 4 assertions.
+Ran 7 tests containing 7 assertions.
 1 failures, 0 errors.
-{:test 4, :pass 3, :fail 1, :error 0}
+{:test 7, :pass 6, :fail 1, :error 0}
 ```
 
 or run it sequentially which turns this library into [test-runner](https://github.com/cognitect-labs/test-runner).
@@ -69,6 +68,8 @@ clj -M:test --parallelism false
 ```
 
 ``` shell
+
+
 Running tests in #{"test"}
 
 Testing appa-demo.core-test
@@ -85,9 +86,15 @@ expected: (true? (sut/print-and-sleep 2))
 = start = Business logic number  4
 = end = Business logic updated!
 
-Ran 4 tests containing 4 assertions.
+Testing appa-demo.multi-test
+Inside another thread!
+Inside another thread!
+
+Testing appa-demo.new-test
+
+Ran 7 tests containing 7 assertions.
 1 failures, 0 errors.
-{:test 4, :pass 3, :fail 1, :error 0, :type :summary}
+{:test 7, :pass 6, :fail 1, :error 0, :type :summary}
 ```
 
 
