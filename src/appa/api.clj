@@ -46,9 +46,9 @@
 
 (defn test
   [arg-map]
-  (let [arg-map (if (empty? (:parallelism arg-map))
-                  (assoc arg-map :parallelism true)
-                  arg-map)
+  (let [arg-map (if (some? (:parallelism arg-map))
+                  arg-map
+                  (assoc arg-map :parallelism true))
         result (test-all-test-namespaces arg-map)]
     (println result)
     result))
