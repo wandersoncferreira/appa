@@ -5,7 +5,90 @@ ThreadPool in parallel or in a dedicated ThreadPool by itself.
 
 Tests not specified are run sequentially in a single dedicated ThreadPool.
 
-See `demo/appa-demo` for a usage example.
+See `demo/appa-demo` for the complete usage example.
+
+Your test cases will become
+
+``` clojure
+(ns appa-demo.core-test
+  (:require [appa-demo.core :as sut]
+            [clojure.test :refer [deftest is]]))
+
+(deftest ^:parallel test-1
+  (is (nil? (sut/print-and-sleep 1))))
+
+(deftest ^:parallel test-2
+  (is (true? (sut/print-and-sleep 2))))
+
+(deftest test-3
+  (is (nil? (sut/print-and-sleep 3))))
+
+(deftest ^:dedicated test-4
+  (is (nil? (sut/print-and-sleep 4))))
+```
+
+And then you can call the test suite from the command line using:
+
+``` clojure
+clj -M:test --parallelism true
+```
+
+and the output
+
+``` shell
+
+Running tests in #{"test"}
+
+Running tests in parallel. Found 2 vars
+
+Running tests in dedicated thread pool. Found 1 vars
+
+Running tests... Found 1 vars
+= start = Business logic number  = start = Business logic number  = start = Business logic number = start = Business logic number   3
+1
+4
+2
+= end = Business logic updated!
+= end = Business logic updated!
+
+FAIL in () (core_test.clj:9)
+expected: (true? (sut/print-and-sleep 2))
+  actual: (not (true? nil))
+= end = Business logic updated!
+= end = Business logic updated!
+
+Ran 4 tests containing 4 assertions.
+1 failures, 0 errors.
+{:test 4, :pass 3, :fail 1, :error 0}
+```
+
+or run it sequentially which turns this library into [test-runner](https://github.com/cognitect-labs/test-runner).
+
+``` clojure
+clj -M:test --parallelism false
+```
+
+``` shell
+Running tests in #{"test"}
+
+Testing appa-demo.core-test
+= start = Business logic number  3
+= end = Business logic updated!
+= start = Business logic number  1
+= end = Business logic updated!
+= start = Business logic number  2
+= end = Business logic updated!
+
+FAIL in (test-2) (core_test.clj:9)
+expected: (true? (sut/print-and-sleep 2))
+  actual: (not (true? nil))
+= start = Business logic number  4
+= end = Business logic updated!
+
+Ran 4 tests containing 4 assertions.
+1 failures, 0 errors.
+{:test 4, :pass 3, :fail 1, :error 0, :type :summary}
+```
 
 
 # Prior attempts
