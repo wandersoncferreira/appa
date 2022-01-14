@@ -11,16 +11,28 @@
 
 (defn merge-results
   [report-futures]
-  (let [reports (map #(.get ^FutureTask %) report-futures)]
+  (let [reports (map
+                 #(if (map? %)
+                    %
+                    (.get ^FutureTask %))
+                 report-futures)]
     (apply (partial merge-with +) reports)))
 
 (defn manager
-  [{:vars/keys [parallel dedicated unspecified]
+  [{:vars/keys [parallel sequential]
     :keys [parallel-pool-size]
     :or {parallel-pool-size parallel-thread-pool-size}}]
   (let [result (atom nil)
         executors (atom nil)
         exec-parallel-tests (Executors/newFixedThreadPool parallel-pool-size)]
+
+    (println (format "\nRunning sequential tests... Found %s vars" (count sequential)))
+
+    (binding [t/report report/report
+              report/*report-counters* (ref report/*initial-report-counters*)]
+      (dotimes [_ (count sequential)] (report/inc-report-counter :test))
+      (t/test-vars (vec sequential))
+      (swap! result conj @report/*report-counters*))
 
 
     (swap! executors conj exec-parallel-tests)
@@ -37,31 +49,6 @@
                                               report/*report-counters* (ref report/*initial-report-counters*)]
                                       (report/inc-report-counter :test)
                                       (t/test-vars [v])
-                                      @report/*report-counters*)))))
-
-      (println (format "\nRunning tests in dedicated thread pool. Found %s vars" (count dedicated)))
-      (doseq [v dedicated]
-        (let [exec (Executors/newSingleThreadExecutor)]
-          (swap! executors conj exec)
-          (swap! result conj
-                 (.submit exec
-                          ^Callable (fn []
-                                      (binding [t/report report/report
-                                                report/*report-counters* (ref report/*initial-report-counters*)]
-                                        (report/inc-report-counter :test)
-                                        (t/test-vars [v])
-                                        @report/*report-counters*))))))
-
-      (println (format "\nRunning tests... Found %s vars" (count unspecified)))
-      (let [exec (Executors/newSingleThreadExecutor)]
-        (swap! executors conj exec)
-        (swap! result conj
-               (.submit exec
-                        ^Callable (fn []
-                                    (binding [t/report report/report
-                                              report/*report-counters* (ref report/*initial-report-counters*)]
-                                      (dotimes [_ (count unspecified)] (report/inc-report-counter :test))
-                                      (t/test-vars (vec unspecified))
                                       @report/*report-counters*)))))
 
       ;; wait for all the report results

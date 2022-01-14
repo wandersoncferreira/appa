@@ -11,5 +11,5 @@
 (deftest test-3
   (is (nil? (sut/print-and-sleep 3))))
 
-(deftest ^:dedicated test-4
+(deftest ^:parallel test-4
   (is (nil? (sut/print-and-sleep 4))))

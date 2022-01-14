@@ -18,13 +18,10 @@
   (let [ns-obj (the-ns n)
         vars (vals (ns-interns ns-obj))
         vars-parallel (vars-with-same-key-name vars :parallel)
-        vars-dedicated (vars-with-same-key-name vars :dedicated)
         vars-unspecified
-        (set/difference
-         (set vars) (set/union vars-parallel vars-dedicated))]
+        (set/difference (set vars) vars-parallel)]
     {:vars/parallel vars-parallel
-     :vars/dedicated vars-dedicated
-     :vars/unspecified vars-unspecified}))
+     :vars/sequential vars-unspecified}))
 
 (defn test-all-test-namespaces
   [options]

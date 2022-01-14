@@ -1,6 +1,6 @@
 # appa
 Appa is a test runner for `clojure.test` which allow you to annotate tests with
-`^:parallel` and `^:dedicated` metadata to run the specified test in a
+`^:parallel` metadata to run the specified test in a
 ThreadPool in parallel or in a dedicated ThreadPool by itself.
 
 Tests not specified are run sequentially in a single dedicated ThreadPool.
